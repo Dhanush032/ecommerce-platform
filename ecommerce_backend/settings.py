@@ -15,7 +15,13 @@ SECRET_KEY = SECRET_KEYS
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config ('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['smart-shopping.onrender.com', '127.0.0.1']
+ALLOWED_HOSTS = [
+    "ecommerce-platform-2cke.onrender.com",  # your Render URL
+    "www.ecommerce-platform-2cke.onrender.com",  # optional
+    "localhost",
+    "127.0.0.1",
+]
+
 
 
 
