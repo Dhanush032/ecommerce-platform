@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
-import dj_database_url
+
 
 SECRET_KEYS = config('SECRET_KEY')
 JWT_SECRET_KEY = config('JWT_SECRET_KEY', default=SECRET_KEYS)
@@ -17,9 +17,7 @@ DEBUG = config ('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['smart-shopping.onrender.com', '127.0.0.1']
 
-DATABASES = {
-    'default': dj_database_url.parse(config('DATABASE_URL'))
-}
+
 
 
 # Login/Logout Redirects
