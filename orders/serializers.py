@@ -65,7 +65,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         
         with transaction.atomic():
-            # Get user's cart
+            
             try:
                 cart = Cart.objects.get(user=user)
             except Cart.DoesNotExist:
@@ -75,22 +75,21 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             if not cart_items:
                 raise serializers.ValidationError("Cart is empty")
             
-            # Create order
+            
             order = Order.objects.create(
                 user=user,
                 total_amount=cart.total_price,
                 **validated_data
             )
             
-            # Create order items and update stock
+            
             for cart_item in cart_items:
-                # Check stock availability
+                
                 if cart_item.product.stock_quantity < cart_item.quantity:
                     raise serializers.ValidationError(
                         f"Insufficient stock for {cart_item.product.name}"
                     )
                 
-                # Create order item
                 OrderItem.objects.create(
                     order=order,
                     product=cart_item.product,
@@ -98,11 +97,9 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     price=cart_item.product.effective_price
                 )
                 
-                # Update product stock
                 cart_item.product.stock_quantity -= cart_item.quantity
                 cart_item.product.save()
             
-            # Clear cart
             cart_items.delete()
             
             return order

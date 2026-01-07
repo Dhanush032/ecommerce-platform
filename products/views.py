@@ -1,9 +1,8 @@
-from rest_framework import generics, permissions, filters, status
+from rest_framework import  filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .models import Category, Product
 from .serializers import (
@@ -50,7 +49,6 @@ class ProductViewSet(ModelViewSet):
     def get_queryset(self):
         queryset = Product.objects.select_related('category')
         
-        # Filter by price range
         min_price = self.request.query_params.get('min_price')
         max_price = self.request.query_params.get('max_price')
         
@@ -59,14 +57,12 @@ class ProductViewSet(ModelViewSet):
         if max_price:
             queryset = queryset.filter(price__lte=max_price)
         
-        # Filter by availability
         in_stock = self.request.query_params.get('in_stock')
         if in_stock == 'true':
             queryset = queryset.filter(stock_quantity__gt=0)
         elif in_stock == 'false':
             queryset = queryset.filter(stock_quantity=0)
         
-        # For non-admin users, only show active products
         if not (self.request.user.is_authenticated and self.request.user.is_admin):
             queryset = queryset.filter(is_active=True)
         
@@ -103,7 +99,6 @@ class ProductViewSet(ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def featured(self, request):
-        """Get featured products"""
         queryset = self.get_queryset().filter(featured=True, is_active=True)
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -115,7 +110,6 @@ class ProductViewSet(ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def low_stock(self, request):
-        """Get products with low stock (Admin only)"""
         if not (request.user.is_authenticated and request.user.is_admin):
             return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
         

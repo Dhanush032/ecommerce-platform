@@ -1,10 +1,9 @@
-from rest_framework import generics, permissions, status
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
-from products.models import Product
 from .models import Cart, CartItem, Order
 from .serializers import (
     CartSerializer, 
@@ -13,7 +12,7 @@ from .serializers import (
     OrderCreateSerializer,
     OrderStatusUpdateSerializer
 )
-from .permissions import IsOwnerOrAdmin, IsAdminOrOwner
+from .permissions import IsOwnerOrAdmin
 
 class CartViewSet(ModelViewSet):
     serializer_class = CartSerializer
@@ -44,7 +43,6 @@ class CartViewSet(ModelViewSet):
         product_id = serializer.validated_data['product_id']
         quantity = serializer.validated_data['quantity']
         
-        # Check if item already exists in cart
         cart_item, created = CartItem.objects.get_or_create(
             cart=cart,
             product_id=product_id,
@@ -52,9 +50,7 @@ class CartViewSet(ModelViewSet):
         )
         
         if not created:
-            # Update quantity if item already exists
             cart_item.quantity += quantity
-            # Check stock availability
             if cart_item.quantity > cart_item.product.stock_quantity:
                 return Response(
                     {'error': 'Insufficient stock'}, 
@@ -66,7 +62,6 @@ class CartViewSet(ModelViewSet):
     
     @action(detail=False, methods=['put'])
     def update_item(self, request):
-        """Update cart item quantity"""
         cart = get_object_or_404(Cart, user=request.user)
         item_id = request.data.get('item_id')
         quantity = request.data.get('quantity', 1)
@@ -76,7 +71,6 @@ class CartViewSet(ModelViewSet):
         
         cart_item = get_object_or_404(CartItem, cart=cart, id=item_id)
         
-        # Check stock availability
         if quantity > cart_item.product.stock_quantity:
             return Response({'error': 'Insufficient stock'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -87,7 +81,6 @@ class CartViewSet(ModelViewSet):
     
     @action(detail=False, methods=['delete'])
     def remove_item(self, request):
-        """Remove item from cart"""
         cart = get_object_or_404(Cart, user=request.user)
         item_id = request.data.get('item_id')
         
@@ -98,7 +91,6 @@ class CartViewSet(ModelViewSet):
     
     @action(detail=False, methods=['delete'])
     def clear(self, request):
-        """Clear entire cart"""
         cart = get_object_or_404(Cart, user=request.user)
         cart.items.all().delete()
         return Response({'message': 'Cart cleared'})
@@ -121,7 +113,7 @@ class OrderViewSet(ReadOnlyModelViewSet):
     
     @action(detail=False, methods=['post'])
     def create_order(self, request):
-        """Create a new order from cart"""
+
         serializer = OrderCreateSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
@@ -129,7 +121,7 @@ class OrderViewSet(ReadOnlyModelViewSet):
     
     @action(detail=True, methods=['put'], permission_classes=[permissions.IsAuthenticated])
     def update_status(self, request, pk=None):
-        """Update order status (Admin only)"""
+
         if not request.user.is_admin:
             return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
         
@@ -141,7 +133,6 @@ class OrderViewSet(ReadOnlyModelViewSet):
     
     @action(detail=False, methods=['get'])
     def my_orders(self, request):
-        """Get current user's orders"""
         orders = Order.objects.filter(user=request.user)
         page = self.paginate_queryset(orders)
         if page is not None:

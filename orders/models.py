@@ -50,14 +50,12 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     
-    # Shipping Information
     shipping_address = models.TextField()
     shipping_city = models.CharField(max_length=100)
     shipping_state = models.CharField(max_length=100)
     shipping_zip_code = models.CharField(max_length=20)
     shipping_phone = models.CharField(max_length=15)
     
-    # Order tracking
     order_notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
