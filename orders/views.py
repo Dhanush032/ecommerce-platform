@@ -3,7 +3,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema
 from .models import Cart, CartItem, Order
 from .serializers import (
     CartSerializer, 
@@ -25,16 +24,8 @@ class CartViewSet(ModelViewSet):
         cart, created = Cart.objects.get_or_create(user=self.request.user)
         return cart
     
-    @extend_schema(
-        summary="Get Cart",
-        description="Retrieve the current user's shopping cart"
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-    
     @action(detail=False, methods=['post'])
     def add_item(self, request):
-        """Add item to cart"""
         cart, created = Cart.objects.get_or_create(user=request.user)
         
         serializer = CartItemSerializer(data=request.data)
@@ -103,13 +94,6 @@ class OrderViewSet(ReadOnlyModelViewSet):
         if self.request.user.is_admin:
             return Order.objects.all()
         return Order.objects.filter(user=self.request.user)
-    
-    @extend_schema(
-        summary="List Orders",
-        description="List orders (all for admin, user's own orders for customers)"
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
     
     @action(detail=False, methods=['post'])
     def create_order(self, request):

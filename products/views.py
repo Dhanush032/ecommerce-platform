@@ -3,7 +3,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .models import Category, Product
 from .serializers import (
     CategorySerializer, 
@@ -23,20 +22,7 @@ class CategoryViewSet(ModelViewSet):
     ordering_fields = ['name', 'created_at']
     ordering = ['name']
     
-    @extend_schema(
-        summary="List Categories",
-        description="Retrieve a list of all active categories"
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
     
-    @extend_schema(
-        summary="Create Category",
-        description="Create a new product category (Admin only)"
-    )
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
 class ProductViewSet(ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -74,28 +60,6 @@ class ProductViewSet(ModelViewSet):
         elif self.action in ['create', 'update', 'partial_update']:
             return ProductCreateUpdateSerializer
         return ProductDetailSerializer
-    
-    @extend_schema(
-        summary="List Products",
-        description="Retrieve a list of products with filtering and search capabilities",
-        parameters=[
-            OpenApiParameter('category', int, description='Filter by category ID'),
-            OpenApiParameter('min_price', float, description='Minimum price filter'),
-            OpenApiParameter('max_price', float, description='Maximum price filter'),
-            OpenApiParameter('in_stock', bool, description='Filter by stock availability'),
-            OpenApiParameter('featured', bool, description='Filter featured products'),
-            OpenApiParameter('search', str, description='Search in name and description'),
-        ]
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    @extend_schema(
-        summary="Create Product",
-        description="Create a new product (Admin only)"
-    )
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
     
     @action(detail=False, methods=['get'])
     def featured(self, request):

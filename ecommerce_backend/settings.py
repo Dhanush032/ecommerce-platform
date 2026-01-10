@@ -24,14 +24,6 @@ ALLOWED_HOSTS = [
 
 
 
-
-
-# Login/Logout Redirects
-# LOGIN_URL = '/login/'
-# LOGIN_REDIRECT_URL = '/profile/'
-# LOGOUT_REDIRECT_URL = '/'
-
-
 # Application definition
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -46,7 +38,6 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    'drf_spectacular',
     'django_filters',
 ]
 
@@ -163,7 +154,6 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 # JWT Settings
@@ -181,22 +171,13 @@ SIMPLE_JWT = {
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG  
 
-# Spectacular settings for API documentation
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'E-Commerce API',
-    'DESCRIPTION': 'A comprehensive e-commerce backend API with authentication, product management, and order processing',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True,
-}
+
 
 
 
